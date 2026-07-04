@@ -1,6 +1,6 @@
 # Governance
 
-`cloud-itonami-9329` is an OSS open-business blueprint for other amusement and recreation activities not elsewhere classified (e.g. arcades, escape rooms, recreational fishing/hunting operations).
+`cloud-itonami-isic-9329` is an OSS open-business blueprint for other amusement and recreation activities not elsewhere classified (e.g. arcades, escape rooms, recreational fishing/hunting operations).
 Governance covers both the capability layer and the operator model.
 
 ## Maintainers

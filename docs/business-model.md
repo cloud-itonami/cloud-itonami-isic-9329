@@ -2,7 +2,7 @@
 
 ## Classification
 
-- Repository: `cloud-itonami-9329`
+- Repository: `cloud-itonami-isic-9329`
 - ISIC Rev.5: `9329`
 - Activity: other amusement and recreation activities not elsewhere classified (e.g. arcades, escape rooms, recreational fishing/hunting operations)
 - Social impact: cultural/recreational access, data sovereignty, transparent audit

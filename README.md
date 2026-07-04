@@ -1,4 +1,4 @@
-# cloud-itonami-9329
+# cloud-itonami-isic-9329
 
 Open Business Blueprint for **ISIC Rev.5 9329**: Other amusement and recreation activities n.e.c..
 

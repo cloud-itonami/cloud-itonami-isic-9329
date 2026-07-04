@@ -1,4 +1,4 @@
-{:itonami.blueprint/id "cloud-itonami-9329"
+{:itonami.blueprint/id "cloud-itonami-isic-9329"
  :itonami.blueprint/name "Other amusement and recreation activities n.e.c."
  :itonami.blueprint/isic-rev5 "9329"
  :itonami.blueprint/domain :recreation/other-amusement
