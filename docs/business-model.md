@@ -34,3 +34,37 @@
 - a fabricated safety-inspection record forces a hold, not an override
 - every resumption path is auditable
 - emergency manual override paths remain outside LLM control
+- an obstructed emergency-egress path, or a venue whose own recorded
+  occupancy exceeds its own recorded maximum capacity, forces a hold,
+  not an override
+- operation resumption is logged and escalated, and cannot be resumed
+  twice for the same venue: a double-resumption attempt is held off
+  this actor's own venue facts alone, with no upstream comparison
+  needed
+
+## Recreation Safety Governor: decision rule
+
+`blueprint.edn` fixes `:itonami.blueprint/governor` to `:recreation-
+safety-governor` -- this is not a generic "review step," it is the
+one gate the ONE real-world act this business performs (resuming
+operation at a venue after a safety-flagged condition) must pass. The
+governor sits between the RecOps-LLM and execution, per the README's
+Core Contract:
+
+```text
+RecOps-LLM -> Recreation Safety Governor -> hold, proceed, or human approval
+```
+
+**Approves**: routine recreation-venue actions proposed against a
+venue that already has a consented jurisdiction evidence checklist on
+file, satisfied required evidence, a clear emergency-egress path, and
+occupancy within its own recorded capacity. These proceed straight to
+the venue ledger.
+
+**Rejects or escalates**: the governor refuses to let the advisor
+resume operation on its own authority when any of the following hold
+-- a fabricated jurisdiction spec-basis; incomplete evidence; an
+obstructed emergency-egress path; an over-capacity venue; a double-
+resumption attempt. A clean resumption proposal still always routes
+to a human -- `:actuation/resume-operation` is never auto-committed,
+at any rollout phase.
