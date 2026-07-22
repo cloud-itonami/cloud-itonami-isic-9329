@@ -29,10 +29,9 @@
   a query over an immutable log -- the audit trail a patron trusting a
   venue needs, and the evidence an operator needs if a resumption is
   later disputed."
-  (:require #?(:clj  [clojure.edn :as edn]
-               :cljs [cljs.reader :as edn])
-            [recreation.registry :as registry]
-            [langchain.db :as d]))
+  (:require [recreation.registry :as registry]
+            [langchain.db :as d]
+            [langchain-store.core :as ls]))
 
 (defprotocol Store
   (venue [s id])
@@ -133,16 +132,13 @@
   Map/compound values (verification/egress-screen payloads, ledger
   facts, resumption records) are stored as EDN strings so
   `langchain.db` doesn't expand them into sub-entities -- the same
-  convention every sibling actor's store uses."
-  {:venue/id                    {:db/unique :db.unique/identity}
-   :verification/venue-id       {:db/unique :db.unique/identity}
-   :egress-screen/venue-id      {:db/unique :db.unique/identity}
-   :ledger/seq                  {:db/unique :db.unique/identity}
-   :resumption/seq              {:db/unique :db.unique/identity}
-   :sequence/jurisdiction       {:db/unique :db.unique/identity}})
-
-(defn- enc [v] (pr-str v))
-(defn- dec* [s] (when s (edn/read-string s)))
+  convention every sibling actor's store uses. The identity-schema
+  builder, EDN-blob codec and seq-keyed event-log read/append are the
+  shared kotoba-lang/langchain-store machinery (ADR-2607141600) -- the
+  seam ~190 actors hand-roll; this store keeps only its domain wiring."
+  (ls/identity-schema
+   [:venue/id :verification/venue-id :egress-screen/venue-id
+    :ledger/seq :resumption/seq :sequence/jurisdiction]))
 
 (defn- venue->tx [{:keys [id venue-name hold-reason emergency-egress-obstructed? current-occupancy
                           maximum-capacity resumed? jurisdiction status resumption-number]}]
@@ -181,21 +177,15 @@
          (map #(pull->venue (d/pull (d/db conn) venue-pull [:venue/id %])))
          (sort-by :id)))
   (egress-screen-of [_ id]
-    (dec* (d/q '[:find ?p . :in $ ?vid
+    (ls/dec* (d/q '[:find ?p . :in $ ?vid
                 :where [?k :egress-screen/venue-id ?vid] [?k :egress-screen/payload ?p]]
               (d/db conn) id)))
   (verify-of [_ venue-id]
-    (dec* (d/q '[:find ?p . :in $ ?vid
+    (ls/dec* (d/q '[:find ?p . :in $ ?vid
                 :where [?a :verification/venue-id ?vid] [?a :verification/payload ?p]]
               (d/db conn) venue-id)))
-  (ledger [_]
-    (->> (d/q '[:find ?s ?f :where [?e :ledger/seq ?s] [?e :ledger/fact ?f]] (d/db conn))
-         (sort-by first)
-         (mapv (comp dec* second))))
-  (resumption-history [_]
-    (->> (d/q '[:find ?s ?r :where [?e :resumption/seq ?s] [?e :resumption/record ?r]] (d/db conn))
-         (sort-by first)
-         (mapv (comp dec* second))))
+  (ledger [_] (ls/read-stream conn :ledger/seq :ledger/fact))
+  (resumption-history [_] (ls/read-stream conn :resumption/seq :resumption/record))
   (next-sequence [_ jurisdiction]
     (or (d/q '[:find ?n . :in $ ?j
               :where [?e :sequence/jurisdiction ?j] [?e :sequence/next ?n]]
@@ -209,10 +199,10 @@
       (d/transact! conn [(venue->tx value)])
 
       :verification/set
-      (d/transact! conn [{:verification/venue-id (first path) :verification/payload (enc payload)}])
+      (d/transact! conn [{:verification/venue-id (first path) :verification/payload (ls/enc payload)}])
 
       :egress-screen/set
-      (d/transact! conn [{:egress-screen/venue-id (first path) :egress-screen/payload (enc payload)}])
+      (d/transact! conn [{:egress-screen/venue-id (first path) :egress-screen/payload (ls/enc payload)}])
 
       :venue/mark-resumed
       (let [venue-id (first path)
@@ -222,12 +212,12 @@
         (d/transact! conn
                      [(venue->tx (assoc venue-patch :id venue-id))
                       {:sequence/jurisdiction jurisdiction :sequence/next next-n}
-                      {:resumption/seq (count (resumption-history s)) :resumption/record (enc (get result "record"))}])
+                      {:resumption/seq (count (resumption-history s)) :resumption/record (ls/enc (get result "record"))}])
         result)
       nil)
     s)
   (append-ledger! [s fact]
-    (d/transact! conn [{:ledger/seq (count (ledger s)) :ledger/fact (enc fact)}])
+    (ls/append-blob! conn :ledger/seq :ledger/fact (count (ledger s)) fact)
     fact)
   (with-venues [s venues]
     (when (seq venues) (d/transact! conn (mapv venue->tx (vals venues)))) s))
