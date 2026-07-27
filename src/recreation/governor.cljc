@@ -178,7 +178,17 @@
   [{:keys [op subject]} st]
   (when (= op :actuation/resume-operation)
     (let [v (store/venue st subject)]
-      (when (registry/occupancy-exceeds-capacity? v)
+      (cond
+        ;; Either figure missing or non-numeric: the limit cannot be
+        ;; evaluated, so it is not "within limits". This used to fall
+        ;; through as "not over" and proceed.
+        ;; Only when the entity EXISTS: a missing entity is a different
+        ;; violation that another gate owns, and firing here would mask it.
+        (and v (not (registry/occupancy-exceeds-capacity-checkable? v)))
+        [{:rule :occupancy-exceeds-capacity
+          :detail "上限判定に必要な値が記録されていない -- 限度内と断定できないため進めない"}]
+
+        (registry/occupancy-exceeds-capacity? v)
         [{:rule :occupancy-exceeds-capacity
           :detail (str subject " の現在収容人員(" (:current-occupancy v)
                       ")が最大収容人員(" (:maximum-capacity v) ")を超過している")}]))))
