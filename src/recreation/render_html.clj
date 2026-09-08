@@ -31,7 +31,7 @@
   (default `docs/samples/operator-console.html`)."
   (:require [jp-go-dds.skin]
             [clojure.java.io :as io]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [recreation.store :as store]
             [recreation.facts :as facts]
             [recreation.registry :as registry]
