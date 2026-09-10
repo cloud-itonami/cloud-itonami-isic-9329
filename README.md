@@ -126,7 +126,7 @@ layers enforce this (`recreation.governor`'s `:actuation/resume-
 operation` high-stakes gate and `recreation.phase`'s phase table,
 which never puts `:actuation/resume-operation` in any phase's `:auto`
 set) -- see `recreation.phase`'s docstring and
-`test/recreation/phase_test.clj`'s
+`test/recreation/phase_test.kotoba`'s
 `resume-operation-never-auto-at-any-phase`. The actor may draft, check
 and recommend; a human licensed venue operator is always the one who
 actually resumes operation. Matching `leasing`'s/`underwriting`'s/
@@ -222,14 +222,14 @@ reference at all.
 
 | File | Role |
 |---|---|
-| `src/recreation/store.cljc` | **Store** protocol -- `MemStore` ‖ `DatomicStore` (`langchain.db`) + append-only audit ledger + operation-resumption history. No dynamically-filed sub-record -- the actuation op acts directly on a pre-seeded venue, and the double-actuation guard checks a dedicated `:resumed?` boolean rather than a `:status` value |
-| `src/recreation/registry.cljc` | Operation-resumption draft records, plus `occupancy-exceeds-capacity?` -- an HONEST, literal reuse of `facility.registry`'s own specific MAXIMUM-ceiling check (the 13th instance of that family overall), applied to a second venue type, not claimed as new |
-| `src/recreation/facts.cljc` | Per-jurisdiction recreation-venue fire/life-safety and licensing catalog with an official spec-basis citation per entry, honest coverage reporting |
-| `src/recreation/recreationopsllm.cljc` | **RecOps-LLM** -- `mock-advisor` ‖ `llm-advisor`; intake/venue-verification/egress-screening/resumption proposals |
-| `src/recreation/governor.cljc` | **Recreation Safety Governor** -- 5 HARD checks (spec-basis · evidence-incomplete · emergency-egress-obstructed, unconditional evaluation, GENUINELY NEW, the 57th grounding of this discipline · occupancy-exceeds-capacity, MAXIMUM-ceiling reuse, the 13th instance, not claimed as new · already-resumed guard) + 1 soft (confidence/actuation gate) |
-| `src/recreation/phase.cljc` | **Phase 0→3** -- read-only → assisted intake → assisted verify → supervised (operation resumption always human; venue intake is the ONLY auto-eligible op, no direct capital risk) |
-| `src/recreation/operation.cljc` | **OperationActor** -- langgraph-clj StateGraph |
-| `src/recreation/sim.cljc` | demo driver |
+| `src/recreation/store.kotoba` | **Store** protocol -- `MemStore` ‖ `DatomicStore` (`langchain.db`) + append-only audit ledger + operation-resumption history. No dynamically-filed sub-record -- the actuation op acts directly on a pre-seeded venue, and the double-actuation guard checks a dedicated `:resumed?` boolean rather than a `:status` value |
+| `src/recreation/registry.kotoba` | Operation-resumption draft records, plus `occupancy-exceeds-capacity?` -- an HONEST, literal reuse of `facility.registry`'s own specific MAXIMUM-ceiling check (the 13th instance of that family overall), applied to a second venue type, not claimed as new |
+| `src/recreation/facts.kotoba` | Per-jurisdiction recreation-venue fire/life-safety and licensing catalog with an official spec-basis citation per entry, honest coverage reporting |
+| `src/recreation/recreationopsllm.kotoba` | **RecOps-LLM** -- `mock-advisor` ‖ `llm-advisor`; intake/venue-verification/egress-screening/resumption proposals |
+| `src/recreation/governor.kotoba` | **Recreation Safety Governor** -- 5 HARD checks (spec-basis · evidence-incomplete · emergency-egress-obstructed, unconditional evaluation, GENUINELY NEW, the 57th grounding of this discipline · occupancy-exceeds-capacity, MAXIMUM-ceiling reuse, the 13th instance, not claimed as new · already-resumed guard) + 1 soft (confidence/actuation gate) |
+| `src/recreation/phase.kotoba` | **Phase 0→3** -- read-only → assisted intake → assisted verify → supervised (operation resumption always human; venue intake is the ONLY auto-eligible op, no direct capital risk) |
+| `src/recreation/operation.kotoba` | **OperationActor** -- langgraph-clj StateGraph |
+| `src/recreation/sim.kotoba` | demo driver |
 | `test/recreation/*_test.clj` | governor contract · phase invariants · store parity · registry conformance · facts coverage |
 
 ## Business-process coverage (honest)
