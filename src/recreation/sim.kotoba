@@ -1,5 +1,5 @@
 (ns recreation.sim
-  "Demo driver -- `clojure -M:dev:run`. Walks a clean venue through
+  "Demo driver -- `kbb -M:dev:run`. Walks a clean venue through
   intake -> jurisdiction verification -> emergency-egress screening ->
   operation-resumption proposal (always escalates) -> human approval
   -> commit, then shows four HARD holds (a jurisdiction with no
