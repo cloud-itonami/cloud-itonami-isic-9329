@@ -6,7 +6,7 @@
   namespace drives the REAL actor stack (`recreation.operation` ->
   `recreation.governor` -> `recreation.store`) through a scenario
   adapted from this repo's own `recreation.sim` demo driver
-  (`clojure -M:dev:run`, confirmed BEFORE writing this file to produce a
+  (`kbb -M:dev:run`, confirmed BEFORE writing this file to produce a
   sensible ledger against the real seeded venue ids `venue-1`..`venue-4`
   -- this repo's own sim driver uses ids that DO match
   `recreation.store/demo-data`, so it was safe to reuse rather than
@@ -27,7 +27,7 @@
   against the same seed are byte-identical -- verify by diffing two
   consecutive runs into scratch directories.
 
-  Usage: `clojure -M:dev:render-html [out-file]`
+  Usage: `kbb -M:dev:render-html [out-file]`
   (default `docs/samples/operator-console.html`)."
   (:require [jp-go-dds.skin]
             [clojure.java.io :as io]
@@ -358,7 +358,7 @@
      (section
       "This run"
       (str "Generated at build time by <code>recreation.render-html</code> "
-           "(<code>clojure -M:dev:render-html</code>) from a real "
+           "(<code>kbb -M:dev:render-html</code>) from a real "
            "<code>recreation.operation</code> StateGraph run over a freshly "
            "seeded <code>recreation.store</code>. No figure below is typed by hand.")
       (table ["Venues" "Operation threads" "Ledger facts" "Commits"
@@ -474,7 +474,7 @@
      "</main>\n"
      "<footer>\n"
      "  <p>cloud-itonami-isic-9329 — Open Business Blueprint for ISIC Rev.5 9329. "
-     "Regenerate with <code>clojure -M:dev:render-html</code>; the generator refuses "
+     "Regenerate with <code>kbb -M:dev:render-html</code>; the generator refuses "
      "to write a console in which the governor raised no HARD hold.</p>\n"
      "</footer>\n"
      "</body></html>\n")))
