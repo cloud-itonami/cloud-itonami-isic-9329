@@ -1,0 +1,34 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:dev:physics` runs it.
+;;
+;; README "Robotics premise": a facility-safety monitoring robot supports
+;; physical hazard detection at a recreation facility (ISIC 9329, e.g. a
+;; leisure pool / splash park), gated by the Recreation Safety Governor.
+;; Its physical work is patrolling the wet pool deck and stopping short of a
+;; guest when it detects one, and draining the splash pool when it detects
+;; contamination.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isic-9329"
+ :cases
+ [{:id :wet-deck-patrol-stop
+   :kind :transport
+   :procedure "monitoring robot patrols the wet pool deck at walking pace and brakes to a stop when a guest steps into its path"
+   :params {:mass-kg 40.0 :payload-kg 5.0 :distance-m 25.0 :v-max-mps 1.0 :a-max-mps2 0.4
+            :drive-force-n 200.0 :crr 0.02
+            :cog-height-m 0.50 :support-half-length-m 0.22
+            :max-time-s 600.0}
+   :sweep {:param :brake-decel-mps2 :values [0.5 1.0 1.5 2.0 3.0]}
+   :quantity :stopping-distance-m
+   :limit {:max 0.5 :basis "estimate: stop within half a metre of the detection line at patrol speed; the braking deceleration a wet tiled deck allows is itself unmeasured"}
+   :boundary {:lo 0.3 :hi 5.0}}
+  {:id :splash-pool-contamination-drain
+   :kind :tank-drain
+   :procedure "on detecting contamination the robot opens the splash-pool main drain and the pool empties by gravity to the cleaning level"
+   :params {:tank-area-m2 60.0 :h0-m 0.45 :h-target-m 0.03 :cd 0.62 :dt-s 1.0}
+   :sweep {:param :orifice-area-m2 :values [0.005 0.01 0.02 0.03 0.05]}
+   :quantity :time-to-target-s
+   :limit {:max 3600.0 :basis "estimate: splash pool emptied for cleaning within one hour of closure so it can reopen the same session"}
+   :boundary {:lo 0.002 :hi 0.2}}]}
